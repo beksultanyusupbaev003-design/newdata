@@ -224,9 +224,15 @@ const chipsEl=document.getElementById('chips');
 const vcard=document.getElementById('vcard');
 
 let gen={}; // name -> [{text,dataUrl}]
+let viMap={}; // name -> joriy pozitsiya (har mahsulot uchun alohida)
 let active=null;
-let vi=0;
 let busy=false;
+
+// vi — aktiv mahsulotning joriy pozitsiyasi
+Object.defineProperty(window,'vi',{
+  get(){return viMap[active]??0;},
+  set(v){if(active)viMap[active]=v;}
+});
 
 function tok(line){const t=line.trim();return t?t.split(/\s+/)[0]:'';}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
@@ -304,7 +310,8 @@ genBtn.addEventListener('click',async()=>{
   else gen[pname]=codes;
 
   active=pname;
-  vi=gen[pname].length-codes.length;
+  // Yangi generate bo'lganda — birinchi yangi kodga o'tish
+  viMap[pname]=gen[pname].length-codes.length;
 
   badge();renderChips();renderViewer();
   ta.value='';counts();psel.value='';
@@ -321,11 +328,12 @@ function renderChips(){
     </div>`).join('');
 }
 
-window.SW=function(n){active=n;vi=0;renderChips();renderViewer('sR');};
+window.SW=function(n){active=n;/* vi reset yo'q — viMap da saqlangan pozitsiya qoladi */renderChips();renderViewer('sR');};
 window.DEL=function(n){
   if(!confirm('"'+n+'" o\'chirish?'))return;
   delete gen[n];
-  if(active===n){const k=Object.keys(gen);active=k.length?k[0]:null;vi=0;}
+  delete viMap[n];
+  if(active===n){const k=Object.keys(gen);active=k.length?k[0]:null;}
   badge();renderChips();renderViewer();
 };
 
