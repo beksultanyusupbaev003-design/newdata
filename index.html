@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>MIYRAS PRO</title>
+<script src="https://cdn.jsdelivr.net/npm/bwip-js@4.5.1/dist/bwip-js-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+:root{
+  --bg:#f4f7fb;--card:#fff;--text:#18293d;--sub:#5a6e85;--border:#dde5ef;
+  --pri:#0b5e7c;--pri2:#1a7899;--acc:#2d9cdb;
+  --shadow:0 6px 20px rgba(0,20,40,.08);--r:22px;
+  --ph:#a0b0c0;--qbg:#f8fbff;--green:#16a34a;
+}
+body.dark{
+  --bg:#111923;--card:#1b2537;--text:#e4ecf5;--sub:#8096b5;--border:#253045;
+  --pri:#2f80ed;--pri2:#4791e8;--shadow:0 6px 20px rgba(0,0,0,.45);
+  --ph:#3a4f6a;--qbg:#1b2537;
+}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:1rem;display:flex;flex-direction:column;align-items:center}
+.app{max-width:860px;width:100%}
+
+/* CARD */
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);padding:1.4rem 1.4rem 1.2rem;margin-bottom:1rem}
+
+/* HEADER */
+.head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.1rem}
+h1{font-size:1.7rem;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:9px}
+h1 i{color:var(--pri)}
+.badge{background:var(--pri2);color:#fff;font-size:.78rem;padding:.22rem .8rem;border-radius:30px;font-weight:700}
+
+/* BUTTONS */
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.9rem}
+.btn{border:1.5px solid var(--border);color:var(--text);padding:.55rem 1.1rem;border-radius:40px;font-size:.88rem;font-weight:600;display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:var(--card);transition:background .12s,color .12s,border-color .12s,transform .1s;white-space:nowrap;user-select:none}
+.btn:hover{background:var(--pri2);border-color:var(--pri2);color:#fff;transform:translateY(-1px)}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:#fff;box-shadow:0 3px 10px rgba(11,94,124,.3)}
+.btn.grn{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 3px 10px rgba(22,163,74,.25)}
+.btn.grn:hover{background:#15803d;border-color:#15803d}
+.btn:disabled{opacity:.38;cursor:not-allowed;transform:none!important}
+
+/* SELECT */
+.lbl{font-size:.75rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem}
+.sel-wrap{position:relative;margin-bottom:.9rem}
+.sel-wrap .ico{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--pri);font-size:.9rem;pointer-events:none}
+.sel-wrap .arr{position:absolute;right:1rem;top:50%;transform:translateY(-50%);color:var(--sub);pointer-events:none;font-size:.8rem}
+select{width:100%;padding:.78rem 2.4rem .78rem 2.6rem;border-radius:40px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:.95rem;font-weight:600;outline:none;appearance:none;cursor:pointer;transition:border-color .15s}
+select:focus{border-color:var(--pri)}
+optgroup{font-weight:700;color:var(--sub)}
+option{font-weight:600}
+
+/* TEXTAREA */
+textarea{width:100%;padding:1rem 1.2rem;border-radius:18px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:.88rem;line-height:1.7;resize:vertical;outline:none;transition:border-color .15s;margin-bottom:.5rem;font-family:'Courier New',monospace}
+textarea:focus{border-color:var(--pri)}
+textarea::placeholder{color:var(--ph)}
+
+.stats{display:flex;justify-content:space-between;font-size:.82rem;color:var(--sub);font-weight:600;padding:0 .2rem}
+
+/* PROGRESS */
+.prog-wrap{margin:.8rem 0 .4rem;display:none}
+.prog-bar{background:var(--border);border-radius:30px;height:8px;overflow:hidden}
+.prog-fill{height:8px;background:linear-gradient(90deg,var(--pri),var(--acc));width:0%;border-radius:30px;transition:width .1s}
+.prog-lbl{font-size:.82rem;color:var(--sub);font-weight:600;margin-top:5px;text-align:center}
+
+/* CHIPS */
+.chips-wrap{display:none}
+.chips-ttl{font-size:.75rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:.35rem .8rem .35rem .7rem;border-radius:30px;font-size:.82rem;font-weight:600;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);cursor:pointer;transition:background .1s,color .1s,border-color .1s;user-select:none}
+.chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.chip:hover:not(.on){border-color:var(--pri2);color:var(--pri2)}
+.chip .cnt{background:rgba(0,0,0,.1);padding:.05rem .4rem;border-radius:20px;font-size:.75rem}
+.chip.on .cnt{background:rgba(255,255,255,.25)}
+.chip .x{margin-left:2px;opacity:.55;font-size:.75rem;transition:opacity .1s}
+.chip .x:hover{opacity:1;color:#e53e3e}
+
+/* VIEWER */
+.viewer{text-align:center}
+.vtabs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:1.1rem}
+.vtab{padding:.35rem .85rem;border-radius:30px;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);font-size:.8rem;font-weight:600;cursor:pointer;transition:background .1s,color .1s,border-color .1s;user-select:none}
+.vtab.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.vtab:hover:not(.on){border-color:var(--pri2);color:var(--pri2)}
+.vpname{font-size:1.05rem;font-weight:800;color:var(--pri);margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.qbox{background:var(--qbg);padding:1rem;border-radius:26px;display:inline-block;border:1px solid var(--border);box-shadow:0 6px 18px rgba(0,0,0,.06);margin-bottom:.9rem}
+.qbox img{width:min(270px,68vw);height:auto;aspect-ratio:1/1;display:block;border-radius:18px}
+.qtxt{font-size:.82rem;font-weight:700;word-break:break-all;background:var(--bg);padding:.55rem 1.1rem;border-radius:30px;border:1px dashed var(--border);color:var(--pri2);display:inline-block;max-width:96%;margin:.1rem auto .5rem;font-family:'Courier New',monospace}
+.qidx{font-size:.88rem;font-weight:700;color:var(--sub);margin-bottom:.7rem}
+.dl1{padding:.45rem 1.1rem;border-radius:30px;border:1.5px solid var(--green);background:transparent;color:var(--green);font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .1s,color .1s}
+.dl1:hover{background:var(--green);color:#fff}
+.navrow{display:flex;justify-content:center;gap:12px;margin-top:1rem}
+.nb{width:60px;height:60px;border-radius:16px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.07);transition:background .1s,color .1s,transform .1s;user-select:none}
+.nb:hover{background:var(--pri2);border-color:var(--pri2);color:#fff;transform:translateY(-2px)}
+
+/* Placeholder */
+.ph-box{padding:3.5rem 1.5rem;border:2px dashed var(--border);border-radius:18px;color:var(--ph);text-align:center}
+.ph-box i{font-size:2.2rem;opacity:.35;display:block;margin-bottom:.9rem}
+.ph-box p{font-size:.95rem;font-weight:600}
+
+/* Animations — fast */
+.sR{animation:sR .18s ease}
+.sL{animation:sL .18s ease}
+@keyframes sR{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
+@keyframes sL{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
+
+footer{margin-top:.4rem;opacity:.42;text-align:center;font-size:.78rem;padding-bottom:.8rem}
+@media(max-width:560px){
+  .row{justify-content:center}
+  h1{font-size:1.4rem}
+  .nb{width:54px;height:54px;font-size:1.2rem}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- INPUT CARD -->
+<div class="card">
+  <div class="head">
+    <h1><i class="fas fa-qrcode"></i> MIYRAS PRO <span class="badge" id="bdg">0 valid</span></h1>
+    <button class="btn" id="darkBtn"><i class="fas fa-moon"></i> Dark</button>
+  </div>
+
+  <!-- Product select -->
+  <div class="lbl"><i class="fas fa-box"></i>&nbsp; Mahsulotni tanlang</div>
+  <div class="sel-wrap">
+    <i class="fas fa-box-open ico"></i>
+    <select id="psel">
+      <option value="">— Mahsulot tanlang —</option>
+      <optgroup label="0,45L — CAN (Konserva)">
+        <option>Sarbast Lite CAN 0,45L</option>
+        <option>Sarbast Original CAN 0,45L</option>
+        <option>Sarbast Original Unfiltered CAN 0,45L</option>
+        <option>Sarbast Special CAN 0,45L</option>
+        <option>Tuborg Green CAN 0,45L</option>
+        <option>Tuborg Lite CAN 0,45L</option>
+        <option>Zatecky Gus Svetliy CAN 0,45L</option>
+        <option>Zatecky Gus Exportniy CAN 0,45L</option>
+        <option>Zatecky Gus Krepkiy CAN 0,45L</option>
+        <option>Zatecky Gus Nefiltrovaniy CAN 0,45L</option>
+        <option>Carlsberg Pilsner CAN 0,45L</option>
+        <option>Kronenbourg Blanc CAN 0,45L</option>
+      </optgroup>
+      <optgroup label="0,5L — RGB (Shisha butilka)">
+        <option>Sarbast Lite RGB 0,5L</option>
+        <option>Sarbast Original RGB 0,5L</option>
+        <option>Sarbast Special RGB 0,5L</option>
+        <option>Tuborg Green RGB 0,5L</option>
+        <option>Tuborg Lite RGB 0,5L</option>
+        <option>Zatecky Gus Svetliy RGB 0,47L</option>
+        <option>Zatecky Gus Exportniy RGB 0,47L</option>
+        <option>Carlsberg Pilsner RGB 0,45L</option>
+        <option>Kronenbourg Blanc RGB 0,43L</option>
+      </optgroup>
+      <optgroup label="1,5L — PET (Baklashka)">
+        <option>Sarbast Lite PET 1,5L</option>
+        <option>Sarbast Original PET 1,5L</option>
+        <option>Sarbast Special PET 1,5L</option>
+      </optgroup>
+    </select>
+    <i class="fas fa-chevron-down arr"></i>
+  </div>
+
+  <!-- Buttons -->
+  <div class="row">
+    <button class="btn" id="uploadBtn"><i class="fas fa-upload"></i> TXT</button>
+    <button class="btn pri" id="genBtn"><i class="fas fa-play"></i> Generate</button>
+    <button class="btn" id="clearBtn"><i class="fas fa-eraser"></i> Tozalash</button>
+    <button class="btn grn" id="zipBtn" disabled><i class="fas fa-file-archive"></i> ZIP Yuklab olish</button>
+  </div>
+
+  <!-- Textarea -->
+  <div class="lbl"><i class="fas fa-list"></i>&nbsp; QR kodlarni kiriting (har qatorda 1 ta)</div>
+  <textarea id="ta" rows="6" placeholder="010460990022007021SL8VPBR91EE06922Kg3LbVsB1j...
+har qatorda bitta kod yozing yoki TXT fayl yuklang"></textarea>
+
+  <!-- Progress -->
+  <div class="prog-wrap" id="pw">
+    <div class="prog-bar"><div class="prog-fill" id="pf"></div></div>
+    <div class="prog-lbl" id="pl">...</div>
+  </div>
+
+  <div class="stats">
+    <span>Qatorlar: <b id="tl">0</b></span>
+    <span>Yaroqli (&ge;5): <b id="el">0</b></span>
+  </div>
+</div>
+
+<!-- CHIPS CARD -->
+<div class="card chips-wrap" id="chipsCard">
+  <div class="chips-ttl"><i class="fas fa-layer-group"></i>&nbsp; Tayyor mahsulotlar</div>
+  <div class="chips" id="chips"></div>
+</div>
+
+<!-- VIEWER CARD -->
+<div class="card viewer" id="vcard" style="display:none"></div>
+
+<footer><i class="fas fa-shield-alt"></i> MIYRAS PRO &middot; DataMatrix Generator</footer>
+</div>
+
+<input type="file" id="fi" accept=".txt,text/plain" style="display:none">
+
+<script>
+(function(){
+"use strict";
+
+const ta=document.getElementById('ta');
+const psel=document.getElementById('psel');
+const bdg=document.getElementById('bdg');
+const tlEl=document.getElementById('tl');
+const elEl=document.getElementById('el');
+const genBtn=document.getElementById('genBtn');
+const clearBtn=document.getElementById('clearBtn');
+const darkBtn=document.getElementById('darkBtn');
+const uploadBtn=document.getElementById('uploadBtn');
+const fi=document.getElementById('fi');
+const zipBtn=document.getElementById('zipBtn');
+const pw=document.getElementById('pw');
+const pf=document.getElementById('pf');
+const pl=document.getElementById('pl');
+const chipsCard=document.getElementById('chipsCard');
+const chipsEl=document.getElementById('chips');
+const vcard=document.getElementById('vcard');
+
+let gen={}; // name -> [{text,dataUrl}]
+let active=null;
+let vi=0;
+let busy=false;
+
+function tok(line){const t=line.trim();return t?t.split(/\s+/)[0]:'';}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function sfn(s){return s.replace(/[^\w\u0400-\u04ff\-\.]/g,'_').replace(/_+/g,'_');}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function counts(){
+  const lines=ta.value.split(/\r?\n/);
+  tlEl.textContent=lines.length;
+  elEl.textContent=lines.map(tok).filter(t=>t.length>=5).length;
+}
+function badge(){
+  let n=0;Object.values(gen).forEach(a=>n+=a.length);
+  bdg.textContent=n+' valid';
+  zipBtn.disabled=n===0;
+}
+
+ta.addEventListener('input',counts);
+counts();
+
+darkBtn.addEventListener('click',()=>{
+  document.body.classList.toggle('dark');
+  darkBtn.innerHTML=document.body.classList.contains('dark')
+    ?'<i class="fas fa-sun"></i> Light':'<i class="fas fa-moon"></i> Dark';
+});
+
+clearBtn.addEventListener('click',()=>{ta.value='';counts();});
+
+uploadBtn.addEventListener('click',()=>fi.click());
+fi.addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{ta.value=ev.target.result;counts();fi.value='';};
+  r.readAsText(f);
+});
+
+function makeDM(text){
+  return new Promise((res,rej)=>{
+    try{
+      const c=document.createElement('canvas');
+      bwipjs.toCanvas(c,{bcid:'datamatrix',text,scale:5,includetext:false,padding:6,backgroundcolor:'FFFFFF'});
+      res(c.toDataURL('image/png'));
+    }catch(e){rej(e);}
+  });
+}
+
+genBtn.addEventListener('click',async()=>{
+  if(busy)return;
+  const pname=psel.value.trim();
+  if(!pname){alert('Mahsulotni tanlang!');psel.focus();return;}
+  const lines=ta.value.split(/\r?\n/);
+  const valid=lines.map(tok).filter(t=>t.length>=5);
+  if(!valid.length){alert('QR kodlarni kiriting (kamida 5 belgi).');return;}
+
+  busy=true;genBtn.disabled=true;
+  pw.style.display='block';pf.style.width='0%';
+
+  const codes=[];
+  const BATCH=15;
+  for(let i=0;i<valid.length;i+=BATCH){
+    const batch=valid.slice(i,i+BATCH);
+    const res=await Promise.all(batch.map(t=>makeDM(t).then(u=>({text:t,dataUrl:u})).catch(()=>null)));
+    res.filter(Boolean).forEach(x=>codes.push(x));
+    const pct=Math.round(((i+BATCH)/valid.length)*100);
+    pf.style.width=Math.min(pct,100)+'%';
+    pl.textContent=pname+' · '+Math.min(i+BATCH,valid.length)+' / '+valid.length;
+    await sleep(12);
+  }
+
+  pw.style.display='none';
+  genBtn.disabled=false;busy=false;
+  if(!codes.length){alert("Kodlar yaratilmadi.");return;}
+
+  if(gen[pname]) gen[pname].push(...codes);
+  else gen[pname]=codes;
+
+  active=pname;
+  vi=gen[pname].length-codes.length;
+
+  badge();renderChips();renderViewer();
+  ta.value='';counts();psel.value='';
+});
+
+function renderChips(){
+  const keys=Object.keys(gen);
+  chipsCard.style.display=keys.length?'block':'none';
+  chipsEl.innerHTML=keys.map(n=>`
+    <div class="chip${n===active?' on':''}" onclick="SW('${esc(n)}')">
+      <i class="fas fa-box-open" style="font-size:.75rem"></i>
+      ${esc(n)}<span class="cnt">${gen[n].length}</span>
+      <span class="x" onclick="event.stopPropagation();DEL('${esc(n)}')"><i class="fas fa-times"></i></span>
+    </div>`).join('');
+}
+
+window.SW=function(n){active=n;vi=0;renderChips();renderViewer('sR');};
+window.DEL=function(n){
+  if(!confirm('"'+n+'" o\'chirish?'))return;
+  delete gen[n];
+  if(active===n){const k=Object.keys(gen);active=k.length?k[0]:null;vi=0;}
+  badge();renderChips();renderViewer();
+};
+
+function renderViewer(anim=''){
+  vcard.style.display='block';
+  if(!active||!gen[active]){
+    vcard.innerHTML=`<div class="ph-box"><i class="fas fa-smile-wink"></i><p>Mahsulot tanlang, QR kodlar yozing va Generate bosing.</p></div>`;
+    return;
+  }
+  const codes=gen[active];
+  const item=codes[vi];
+  const keys=Object.keys(gen);
+
+  const tabs=keys.length>1?`<div class="vtabs">${keys.map(n=>`
+    <div class="vtab${n===active?' on':''}" onclick="SW('${esc(n)}')">${esc(n)} <span style="opacity:.6">(${gen[n].length})</span></div>`).join('')}</div>`:'' ;
+
+  vcard.innerHTML=`
+    <div class="vpname"><i class="fas fa-box-open"></i>${esc(active)}</div>
+    ${tabs}
+    <div id="vc" class="${anim}">
+      <div class="qbox"><img src="${item.dataUrl}" alt="DM" loading="lazy"></div><br>
+      <div class="qtxt">${esc(item.text)}</div>
+      <div class="qidx">${vi+1} / ${codes.length}</div>
+      <button class="dl1" id="dl1"><i class="fas fa-download"></i> Yuklab olish</button>
+    </div>
+    <div class="navrow">
+      <div class="nb" id="nb_p"><i class="fas fa-chevron-up"></i></div>
+      <div class="nb" id="nb_n"><i class="fas fa-chevron-down"></i></div>
+    </div>`;
+
+  document.getElementById('nb_p').onclick=()=>{if(vi>0){vi--;renderViewer('sL');}};
+  document.getElementById('nb_n').onclick=()=>{if(vi<codes.length-1){vi++;renderViewer('sR');}};
+  document.getElementById('dl1').onclick=()=>dlOne(active,vi);
+}
+
+async function dlOne(pname,idx){
+  const item=gen[pname][idx];if(!item)return;
+  const blob=await(await fetch(item.dataUrl)).blob();
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=sfn(pname)+'_'+String(idx+1).padStart(3,'0')+'.png';
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+zipBtn.addEventListener('click',async()=>{
+  const keys=Object.keys(gen);
+  if(!keys.length){alert('Avval Generate bosing!');return;}
+  zipBtn.disabled=true;
+  pw.style.display='block';pf.style.width='0%';
+  const zip=new JSZip();
+  let total=0;keys.forEach(k=>total+=gen[k].length);
+  let done=0;
+  for(const k of keys){
+    const codes=gen[k];
+    const fn=sfn(k);
+    for(let i=0;i<codes.length;i++){
+      const blob=await(await fetch(codes[i].dataUrl)).blob();
+      const path=codes.length===1?fn+'.png':fn+'/'+fn+'_'+String(i+1).padStart(3,'0')+'.png';
+      zip.file(path,blob);
+      done++;
+      pf.style.width=Math.round(done/total*100)+'%';
+      pl.textContent='ZIP: '+k+' · '+(i+1)+'/'+codes.length;
+      await sleep(6);
+    }
+  }
+  pl.textContent='ZIP tayyorlanmoqda...';
+  const blob=await zip.generateAsync({type:'blob'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='miyras_datamatrix.zip';
+  a.click();URL.revokeObjectURL(a.href);
+  pw.style.display='none';zipBtn.disabled=false;
+});
+
+renderViewer();
+})();
+</script>
+</body>
+</html>
