@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-<title>MIYRAS PRO</title>
+<title>ZOLOTO_N1</title>
 <script src="https://cdn.jsdelivr.net/npm/bwip-js@4.5.1/dist/bwip-js-min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -63,8 +63,16 @@ body{
 h1{
   font-size:1.7rem;font-weight:800;letter-spacing:-.03em;
   display:flex;align-items:center;gap:10px;
-  background:linear-gradient(135deg,#fff 30%,var(--pri2));
+}
+.titleAnim{
+  background:linear-gradient(90deg,#fff 0%,var(--pri2) 25%,var(--acc) 50%,var(--pri2) 75%,#fff 100%);
+  background-size:300% auto;
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:titleShine 4s linear infinite;
+}
+@keyframes titleShine{
+  0%{background-position:0% 50%}
+  100%{background-position:300% 50%}
 }
 h1 i{
   -webkit-text-fill-color:initial;
@@ -376,7 +384,7 @@ body.light textarea{background:rgba(230,238,255,0.7);color:var(--text)}
 <!-- INPUT CARD -->
 <div class="card">
   <div class="head">
-    <h1><i class="fas fa-qrcode"></i> MIYRAS PRO <span class="badge" id="bdg">0 valid</span></h1>
+    <h1><i class="fas fa-qrcode"></i> <span class="titleAnim">ZOLOTO_N1</span> <span class="badge" id="bdg">0 valid</span></h1>
     <button class="btn" id="darkBtn"><i class="fas fa-sun"></i> Light</button>
   </div>
 
@@ -454,7 +462,7 @@ har qatorda bitta kod yozing yoki TXT fayl yuklang"></textarea>
 <!-- VIEWER CARD -->
 <div class="card viewer" id="vcard" style="display:none"></div>
 
-<footer><i class="fas fa-shield-alt"></i> MIYRAS PRO &middot; DataMatrix Generator</footer>
+<footer><i class="fas fa-shield-alt"></i> ZOLOTO_N1 &middot; DataMatrix Generator</footer>
 </div>
 
 <input type="file" id="fi" accept=".txt,text/plain" style="display:none">
@@ -482,8 +490,8 @@ const chipsEl=document.getElementById('chips');
 const vcard=document.getElementById('vcard');
 
 let gen={}; // name -> [{text,dataUrl}]
+let vidx={}; // name -> har bir mahsulot uchun saqlangan joriy pozitsiya (index)
 let active=null;
-let vi=0;
 let busy=false;
 
 function tok(line){const t=line.trim();return t?t.split(/\s+/)[0]:'';}
@@ -558,11 +566,13 @@ genBtn.addEventListener('click',async()=>{
   genBtn.disabled=false;busy=false;
   if(!codes.length){alert("Kodlar yaratilmadi.");return;}
 
+  const isNew=!gen[pname];
   if(gen[pname]) gen[pname].push(...codes);
   else gen[pname]=codes;
 
   active=pname;
-  vi=gen[pname].length-codes.length;
+  // Yangi mahsulot bo'lsa 0-dan boshlanadi, mavjud bo'lsa saqlangan pozitsiyada qoladi
+  if(isNew || vidx[pname]===undefined) vidx[pname]=gen[pname].length-codes.length;
 
   badge();renderChips();renderViewer();
   ta.value='';counts();psel.value='';
@@ -579,11 +589,17 @@ function renderChips(){
     </div>`).join('');
 }
 
-window.SW=function(n){active=n;vi=0;renderChips();renderViewer('sR');};
+window.SW=function(n){
+  active=n;
+  // vi qiymatini global o'rniga shu mahsulot uchun saqlangan pozitsiyadan olamiz
+  if(vidx[n]===undefined) vidx[n]=0;
+  renderChips();renderViewer('sR');
+};
 window.DEL=function(n){
   if(!confirm('"'+n+'" o\'chirish?'))return;
   delete gen[n];
-  if(active===n){const k=Object.keys(gen);active=k.length?k[0]:null;vi=0;}
+  delete vidx[n];
+  if(active===n){const k=Object.keys(gen);active=k.length?k[0]:null;}
   badge();renderChips();renderViewer();
 };
 
@@ -594,6 +610,10 @@ function renderViewer(anim=''){
     return;
   }
   const codes=gen[active];
+  if(vidx[active]===undefined) vidx[active]=0;
+  if(vidx[active]>codes.length-1) vidx[active]=codes.length-1;
+  if(vidx[active]<0) vidx[active]=0;
+  const vi=vidx[active];
   const item=codes[vi];
   const keys=Object.keys(gen);
 
@@ -614,8 +634,12 @@ function renderViewer(anim=''){
       <div class="nb" id="nb_n"><i class="fas fa-chevron-down"></i></div>
     </div>`;
 
-  document.getElementById('nb_p').onclick=()=>{if(vi>0){vi--;renderViewer('sL');}};
-  document.getElementById('nb_n').onclick=()=>{if(vi<codes.length-1){vi++;renderViewer('sR');}};
+  document.getElementById('nb_p').onclick=()=>{
+    if(vidx[active]>0){vidx[active]--;renderViewer('sL');}
+  };
+  document.getElementById('nb_n').onclick=()=>{
+    if(vidx[active]<codes.length-1){vidx[active]++;renderViewer('sR');}
+  };
   document.getElementById('dl1').onclick=()=>dlOne(active,vi);
 }
 
